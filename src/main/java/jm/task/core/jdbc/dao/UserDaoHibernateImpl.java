@@ -6,19 +6,17 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
-
-    private static final SessionFactory connection = Util.getSessionFactory();
-
     public UserDaoHibernateImpl() {
 
     }
 
     @Override
     public void createUsersTable() {
-        try {
+        try (SessionFactory connection = Util.getSessionFactory()) {
             Session session = connection.openSession();
             Transaction transaction = session.beginTransaction();
 
@@ -38,7 +36,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
-        try {
+        try (SessionFactory connection = Util.getSessionFactory()) {
             Session session = connection.openSession();
             Transaction transaction = session.beginTransaction();
 
@@ -55,26 +53,35 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Session s = connection.openSession();
-        s.beginTransaction();
-        User u = new User(name, lastName, age);
-        s.save(u);
-        s.getTransaction().commit();
+        try (SessionFactory connection = Util.getSessionFactory()) {
+            Session s = connection.openSession();
+            s.beginTransaction();
+            User u = new User(name, lastName, age);
+            s.save(u);
+            s.getTransaction().commit();
+            s.close();
+        }
     }
 
     @Override
     public void removeUserById(long id) {
-        connection.openSession().createQuery("from User where id = :id").setParameter("id", id);
+        try (SessionFactory connection = Util.getSessionFactory()) {
+            Session s = connection.openSession();
+            s.createQuery("from User where id = :id").setParameter("id", id);
+            s.close();
+        }
     }
 
     @Override
     public List<User> getAllUsers() {
-        return connection.openSession().createQuery("from User").getResultList();
+        try (SessionFactory connection = Util.getSessionFactory()) {
+           return connection.openSession().createQuery("from User").getResultList();
+        }
     }
 
     @Override
     public void cleanUsersTable() {
-        try{
+        try (SessionFactory connection = Util.getSessionFactory()) {
             Session session = connection.openSession();
             Transaction transaction = session.beginTransaction();
 

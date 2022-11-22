@@ -19,6 +19,9 @@ public class Util {
     private static final String DIALECT = "org.hibernate.dialect.MySQLDialect";
     private static Connection connection;
     private static SessionFactory sessionFactory;
+    private Util() {
+
+    }
     public static Connection getConnection() {
         try {
             connection = DriverManager.getConnection(URL, LOGIN, PASSWORD);
